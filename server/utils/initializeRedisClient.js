@@ -3,14 +3,24 @@ const redis = require('redis');
 
 async function initializeRedisClient() {
     try {
-        const client = redis.createClient({
-            username: 'default',
-            password: process.env.DB_PASS,
-            socket: {
-                host: process.env.HOST,
-                port: process.env.REDIS_PORT
-            },
-        });
+        let client;
+        
+        // Support for Railway REDIS_URL format (redis://default:password@host:port)
+        if (process.env.REDIS_URL) {
+            client = redis.createClient({
+                url: process.env.REDIS_URL
+            });
+        } else {
+            // Fallback to individual environment variables
+            client = redis.createClient({
+                username: 'default',
+                password: process.env.DB_PASS,
+                socket: {
+                    host: process.env.HOST,
+                    port: process.env.REDIS_PORT
+                },
+            });
+        }
 
         setInterval(async () => {
             try {
@@ -21,9 +31,9 @@ async function initializeRedisClient() {
           }, 60000); // ping every 60 seconds
           
         await client.connect().then(() => {
-            console.log('Connected to Redis');
+            console.log('✅ Connected to Redis');
         }).catch((err) => {
-            console.error('Redis connection error:', err);
+            console.error('❌ Redis connection error:', err);
         });
 
         return client;
