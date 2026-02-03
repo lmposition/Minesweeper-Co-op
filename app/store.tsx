@@ -80,6 +80,12 @@ export interface MinesweeperState {
     pvpTotalSafeCells: number; // Total non-mine cells to reveal
 
     // ============================================================================
+    // TIMER STATE
+    // ============================================================================
+    timerSeconds: number;   // Elapsed time in seconds
+    timerRunning: boolean;  // True if timer is currently running
+
+    // ============================================================================
     // UI STATE (Mobile flag mode, mouse tracking for chording)
     // ============================================================================
     isChecked: boolean;     // Mobile: true = click mode, false = flag mode
@@ -112,6 +118,11 @@ export interface MinesweeperState {
     updatePlayerHover: (id: string, row: number, col: number, name: string, color: string) => void;
     removePlayerHover: (id: string) => void;
     clearAllHovers: () => void;
+
+    // Timer Setters
+    setTimerSeconds: (seconds: number) => void;
+    setTimerRunning: (running: boolean) => void;
+    resetTimer: () => void;
 
     // PVP Setters
     setPvpStarted: (started: boolean) => void;
@@ -165,6 +176,10 @@ export const useMinesweeperStore = create<MinesweeperState>((set, get) => ({
     pvpIsHost: false,
     pvpOpponentProgress: 0,
     pvpTotalSafeCells: 0,
+
+    // Timer State
+    timerSeconds: 0,
+    timerRunning: false,
 
     // UI State
     isChecked: true,        // Default to click mode (not flag mode)
@@ -417,5 +432,30 @@ export const useMinesweeperStore = create<MinesweeperState>((set, get) => ({
             gameOver: false,
             gameWon: false,
         });
+    },
+
+    // ============================================================================
+    // TIMER SETTERS
+    // ============================================================================
+
+    /**
+     * Set timer seconds
+     */
+    setTimerSeconds: (seconds: number) => {
+        set({ timerSeconds: seconds });
+    },
+
+    /**
+     * Set timer running state
+     */
+    setTimerRunning: (running: boolean) => {
+        set({ timerRunning: running });
+    },
+
+    /**
+     * Reset timer to 0 and stop it
+     */
+    resetTimer: () => {
+        set({ timerSeconds: 0, timerRunning: false });
     }
 }));

@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { Center, Container, HStack, VStack, Box } from "@chakra-ui/react";
 import { useMinesweeperStore } from '@/app/store';
 import Cell from "@/components/Cell";
+import Timer from "@/components/Timer";
 import { Switch } from "@/components/ui/switch";
 import styles from "./Home.module.css";
 
@@ -56,7 +57,10 @@ const Grid = React.memo(({ leaveRoom, resetGame, toggleFlag, openCell, chordCell
         pvpWinner,
         pvpIsHost,
         pvpOpponentProgress,
-        pvpTotalSafeCells
+        pvpTotalSafeCells,
+        // Timer state
+        setTimerRunning,
+        resetTimer
     } = useMinesweeperStore();
 
     // Calculate remaining flags (total mines - flags placed)
@@ -133,6 +137,39 @@ const Grid = React.memo(({ leaveRoom, resetGame, toggleFlag, openCell, chordCell
         }
     }, [leftClick, rightClick, r, c, chordCell, setBothPressed]);
 
+    // ============================================================================
+    // TIMER LOGIC
+    // ============================================================================
+
+    /**
+     * Start timer when first cell is opened
+     * Stop timer when game is won or lost
+     */
+    useEffect(() => {
+        // Check if any cell is open (game has started)
+        const hasOpenCell = board.some(row => row.some(cell => cell.isOpen));
+        
+        // Start timer if game started and not over
+        if (hasOpenCell && !gameOver && !gameWon) {
+            setTimerRunning(true);
+        }
+        
+        // Stop timer if game is over or won
+        if (gameOver || gameWon) {
+            setTimerRunning(false);
+        }
+    }, [board, gameOver, gameWon, setTimerRunning]);
+
+    /**
+     * Reset timer when board is reset (all cells closed)
+     */
+    useEffect(() => {
+        const allClosed = board.length > 0 && board.every(row => row.every(cell => !cell.isOpen));
+        if (allClosed) {
+            resetTimer();
+        }
+    }, [board, resetTimer]);
+
 
     return (
         <>
@@ -158,6 +195,9 @@ const Grid = React.memo(({ leaveRoom, resetGame, toggleFlag, openCell, chordCell
                         <div className="bg-slate-100 nes-container with-title max-w-60 mt-6" role="region" aria-label="Room information">
                             <p className="title text-xs">Room:</p>
                             <p className="text-sm" aria-label={`Room code: ${room}`}> {room}</p>
+                        </div>
+                        <div className="mt-6">
+                            <Timer />
                         </div>
                     </div>
                     <div>
@@ -417,6 +457,10 @@ const Grid = React.memo(({ leaveRoom, resetGame, toggleFlag, openCell, chordCell
                                 />
                             }
                         </HStack>
+
+                        <div className="w-full max-w-60">
+                            <Timer />
+                        </div>
 
                         {/* PVP: Progress bars and flag counter for mobile */}
                         {mode === 'pvp' && pvpStarted &&

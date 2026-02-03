@@ -10,8 +10,10 @@ app.use((req, res, next) => {
     const allowedOrigins = [
         'http://localhost:3000',
         'https://minesweeper-test.vercel.app',
-        'https://www.minesweepercoop.com'
-    ];
+        'https://www.minesweepercoop.com',
+        process.env.FRONTEND_URL // Support for Railway or other deployments
+    ].filter(Boolean); // Remove undefined values
+    
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
@@ -44,8 +46,10 @@ const io = new Server(server, {
             const allowedOrigins = [
                 'http://localhost:3000',
                 'https://minesweeper-test.vercel.app',
-                'https://www.minesweepercoop.com'
-            ];
+                'https://www.minesweepercoop.com',
+                process.env.FRONTEND_URL // Support for Railway or other deployments
+            ].filter(Boolean); // Remove undefined values
+            
             // Allow requests with no origin (mobile apps, curl, etc.)
             if (!origin) return callback(null, true);
             if (allowedOrigins.includes(origin)) {
